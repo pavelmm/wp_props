@@ -1,46 +1,36 @@
 /**
  * External dependencies.
  */
-import { Fragment, render } from '@wordpress/element';
+import { compose } from '@wordpress/compose';
+import { withSelect } from '@wordpress/data';
+import { withEffects } from 'refract-callbag';
 
 /**
  * Internal dependencies.
  */
-import SaveLock from './save-lock';
-import ConditionalDisplay from './conditional-display';
-import WidgetHandler from './widget-handler';
-import RevisionsFlag from './revisions-flag';
-import isGutenberg from '../utils/is-gutenberg';
-import { PAGE_NOW_WIDGETS, PAGE_NOW_CUSTOMIZE } from '../lib/constants';
+import aperture from './aperture';
+import handler from './handler';
 
 /**
- * Initializes the monitors.
+ * Performs the evaluation of conditions.
  *
- * @param  {string} context
- * @return {void}
+ * @return {null}
  */
-export default function initializeMonitors( context ) {
-	const { pagenow } = window.cf.config;
-
-	render(
-		<Fragment>
-			{ ! isGutenberg() && (
-				<SaveLock />
-			) }
-
-			{ ( pagenow === PAGE_NOW_WIDGETS || pagenow === PAGE_NOW_CUSTOMIZE ) && (
-				<WidgetHandler />
-			) }
-
-			<ConditionalDisplay context={ context } />
-		</Fragment>,
-		document.createElement( 'div' )
-	);
-
-	const postStuffNode = document.querySelector( '#poststuff' );
-
-	if ( postStuffNode ) {
-		render( <RevisionsFlag />, postStuffNode.appendChild( document.createElement( 'div' ) ) );
-	}
+function ConditionalDisplay() {
+	return null;
 }
 
+const applyWithSelect = withSelect( ( select ) => {
+	const containers = select( 'carbon-fields/metaboxes' ).getContainers();
+
+	return {
+		containers
+	};
+} );
+
+const applyWitEffects = withEffects( aperture, { handler } );
+
+export default compose(
+	applyWithSelect,
+	applyWitEffects
+)( ConditionalDisplay );
